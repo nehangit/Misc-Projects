@@ -30,49 +30,44 @@ else:
 def dictionary(inphash, wordlist):
   with open(wordlist,'r') as file:  
     for line in file:
-      for word in line.split():
-        if(typ==256):
-          tester = hashlib.sha256(word.encode())
-        elif(typ==384):
-          tester = hashlib.sha384(word.encode())
-        elif(typ==224):
-          tester = hashlib.sha224(word.encode())
-        elif(typ==512):
-          tester = hashlib.sha512(word.encode())
-        elif(typ==1):
-          tester = hashlib.sha1(word.encode())        
-        res = tester.hexdigest()
+      for wrd in line.split():
+        com = hasher(wrd)        
+        res = com.hexdigest()
         if (res == inphash):
           print('*' * 20)
-          print('Password found: %s' % word)
+          print('Password found: %s' % wrd)
           exit(0)
   print('Dictionary attack failed..')
   bruteforce(inphash)
 
 def bruteforce(inphash):
   # Can add other symbols to alphabet if needed
-  alphabet = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+  alphabet = '!@#$0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
   print('Bruteforcing passwords...')
   # For every possible combination from alphabet...
   for i in range(1, 11):    # change these values to change the min/max password lengths to bruteforce
     print('Testing passwords of length '+str(i)+'..')
     for c in itertools.product(alphabet, repeat=i):
-      word = ''.join(c)
-      if(typ==256):
-          tester = hashlib.sha256(word.encode())
-      elif(typ==384):
-          tester = hashlib.sha384(word.encode())
-      elif(typ==224):
-          tester = hashlib.sha224(word.encode())
-      elif(typ==512):
-          tester = hashlib.sha512(word.encode())
-      elif(typ==1):
-          tester = hashlib.sha1(word.encode())        
-      res = tester.hexdigest()
+      password = ''.join(c)
+      com = hasher(password)        
+      res = com.hexdigest()
       if (res == inphash):
           print('*' * 20)
-          print('Password found: %s' % word)
+          print('Password found: %s' % password)
           exit(0)
+
+def hasher(word):
+  if(typ==256):
+    tester = hashlib.sha256(word.encode())
+  elif(typ==384):
+    tester = hashlib.sha384(word.encode())
+  elif(typ==224):
+    tester = hashlib.sha224(word.encode())
+  elif(typ==512):
+    tester = hashlib.sha512(word.encode())
+  elif(typ==1):
+    tester = hashlib.sha1(word.encode())
+  return tester
 
 if(args.wordlist==None):
   bruteforce(thehash)
@@ -80,3 +75,4 @@ else:
   dictionary(thehash, args.wordlist)
 # If no password was found by the end..
 print('Password not found.')
+
