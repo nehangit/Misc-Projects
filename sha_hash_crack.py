@@ -9,6 +9,8 @@ import hashlib
 parser = argparse.ArgumentParser(description='Crack a SHA hash (will add support for MD5 and SHA3 hashes in the future)...')
 parser.add_argument('hash', type=str, help='Specify the SHA1/SHA2 hash to crack. SUPPORTED TYPES: SHA256, SHA384, SHA224, SHA512, SHA1')
 parser.add_argument('-w', '--wordlist', type=str, help='Specify a wordlist (or path to wordlist)')
+parser.add_argument('-l', '--maxlength', type=int, default=10, help='Max password length for bruteforcing.')
+parser.add_argument('-m', '--minlength', type=int, default=1, help='Min password length for bruteforcing.')
 args = parser.parse_args()
 
 thehash = args.hash
@@ -38,14 +40,20 @@ def dictionary(inphash, wordlist):
           print('Password found: %s' % wrd)
           exit(0)
   print('Dictionary attack failed..')
-  bruteforce(inphash)
+  bruteforce(inphash, args.minlength, args.maxlength)
 
-def bruteforce(inphash):
+def bruteforce(inphash, minl, maxl):
   # Can add other symbols to alphabet if needed
   alphabet = '!@#$0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
-  print('Bruteforcing passwords...')
+  if(minl < 1 or maxl < 1):
+    print("Min/max bruteforce length cannot be less than 1.\nExiting...")
+    exit(0)
+  elif(maxl < minl):    
+    print("Max bruteforce length must be greater than or equal to min bruteforce length. (Max length = {0}, Min length = {1})\nExiting...".format(maxl, minl))
+    exit(0)
+  print('Bruteforcing passwords from length {0} to {1}...'.format(minl, maxl))
   # For every possible combination from alphabet...
-  for i in range(1, 11):    # change these values to change the min/max password lengths to bruteforce
+  for i in range(minl, maxl+1):    # change these values to change the min/max password lengths to bruteforce
     print('Testing passwords of length '+str(i)+'..')
     for c in itertools.product(alphabet, repeat=i):
       password = ''.join(c)
@@ -70,9 +78,8 @@ def hasher(word):
   return tester
 
 if(args.wordlist==None):
-  bruteforce(thehash)
+  bruteforce(thehash, args.minlength, args.maxlength)
 else:
   dictionary(thehash, args.wordlist)
 # If no password was found by the end..
 print('Password not found.')
-
